@@ -1,0 +1,5 @@
+No segundo passo do tutorial é fornecido o código 
+de uma aplicação todo list que servirá de exemplo para
+seguir na execução do tutorial.
+
+Ao baixar e extrair a aplicação
