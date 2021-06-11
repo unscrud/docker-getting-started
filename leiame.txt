@@ -1,0 +1,18 @@
+Este arquivo contém a descrição da execução do tutorial proposto após
+à instalação do Docker.
+
+Na tela inicial de containeres do Docker o comando abaixo 
+é exibido como proposta de execução.
+
+> docker run -d -p 80:80 docker/getting-started
+
+Logo após será possível acessar via navegador a url http://localhost
+que exibirá um tutorial de introdução ao Docker
+
+docker run é usado para executar um container
+-d executa o container em background (detached mode)
+-p 80:80 mapeia a porta 80 do host para a porta 80 do container
+docker/getting-started é o nome da imagem que será usada
+
+É possivel combinar os caractes usados como parâmetro no comando
+> docker run -d -p 80:80 docker/getting-started
