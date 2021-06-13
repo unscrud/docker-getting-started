@@ -2,4 +2,39 @@ No segundo passo do tutorial é fornecido o código
 de uma aplicação todo list que servirá de exemplo para
 seguir na execução do tutorial.
 
-Ao baixar e extrair a aplicação
+Ao baixar e extrair a aplicação poderemos seguir no tutorial
+criando o Dockerfile que servirá de base para montagem da 
+nossa  imagem
+
+Ele ficará assim:
+FROM node:12-alpine
+RUN apk add --no-cache python g++ make
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node","src/index.js"]
+
+O arquivo deve ter exatamente o nome "Dockerfile" sem extensão
+
+O próximo passo é abrir o termina no diretório em que está o Dockerfile
+e executar o comando abaixo que irá construir a imagem docker
+
+docker build -t getting-started .
+
+O comando lê o Dockerfile, e caso não tenha sido, baixa a imagem base
+descrita em FROM, roda o comando em RUN adicionando as dependências 
+necessárias. Também determina que o diretório base da aplicação seja
+o /app e copia o conteúdo do diretório atual para /app na imagem.
+
+Por fim é executado o comando de instalação das dependências 
+"yarn install ..." e logo depois a aplicação é executada com o CMD.
+
+Agora para visualizar a aplicação rodamos a imagem construída com:
+
+docker run -dp 3000:3000 getting-started
+
+e acessamos através do browser em http://localhost:3000
+
+Podemos observar com o comando "docker container list" que temos depois
+containers rodando. Um responsável pela execução do tutorial e outro da 
+nossa aplicação de exemplo.
