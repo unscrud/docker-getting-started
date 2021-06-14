@@ -1,0 +1,12 @@
+Nesta fase é descrito o compartilhamento da nossa app no dockerhub
+
+Basicamente efetuamos o login, criamos um repositório e depois fazemos
+o push de nossa imagem com: docker push <nome da imagem>
+
+Um ponto interessante é colocar a imagem para ser executada no
+Play with docker, para tanto, depois de ter feito o push da imagem
+basta entrar na plataforma, clicar em "ADD NEW INSTANCE" e então executar:
+
+docker run -dp 3000:3000 YOUR-USER-NAME/getting-started
+
+Assim você poderá acessar sua aplicação diretamente da internet.
