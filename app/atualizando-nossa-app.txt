@@ -1,0 +1,33 @@
+No terceiro passo do tutorial a proposta é observar que uma atualização
+no código da aplicação não vai refletir na aplicação que está sendo
+executada.
+
+A alteração proposta é na linha 56 do arquivo src/static/app.js
+
+- <p className="text-center">No items yet! Add one above!</p>
++ <p className="text-center">You have no todo items yet! Add one above!</p>
+
+Logo depois teremos que refazer o build para assim efetivar a alteração.
+docker build -t getting-started .
+
+Contudo ao atualizar a página a aplicação ainda não foi modificada.
+Vamos rodar o container novamente...
+docker run -dp 3000:3000 getting-started
+
+Então receberemos um erro informando que a porta já está alocada a outro
+container. Para solucionar, vamos parar e remover o container antigo.
+
+Primeiro executaremos o comando "docker ps" para ver qual container
+vamos remover através do ID.
+
+Em seguida copiamos o id do container alvo e usaremos no comando abaixo:
+docker stop <ID>
+
+Para finalmente podermos remover o container com o comando:
+docker rm <ID>
+
+Mas se o objetivo for realmente remover o container podemos forçar com 
+um parâmetro diretamente no rm, veja:
+docker rm -f <id>
+
+Agora sim poderemos executar "docker run -dp 3000:3000 getting-started"
