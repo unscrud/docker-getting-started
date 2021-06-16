@@ -1,0 +1,121 @@
+Nossa aplicação funciona, mas toda vez que apagamos o container
+os dados da aplicação são perdidos.
+
+Quando o container roda, ele usa várias camadas da imagem para
+o sistema de arquivos dele. Cada container Também possui seu próprio
+espaço de rascunho para criar, atualizar e/ou remover arquivos.
+Qualquer mudança não será vista em outro container, mesmo se eles
+estiverem usando a mesma imagem
+
+Para ver na prática, vamos criar o arquivo data.txt em um container 
+do ubuntu com o seguinte comando:
+
+docker run -d ubuntu bash -c "shuf -i 1-10000 -n 1 -o /data.txt && tail -f /dev/null"
+
+Neste comando estamos rodando uma imagem do ubuntu e iniciando um 
+terminal para executar dois comandos unidos com &&.
+O primeiro comando pega um número aleatório de 1 a 10000 e armazena no
+arquivo data.txt, já o seguindo fica lendo o arquivo para manter o 
+container funcionando.
+
+Para ver o arquivo data.txt primeiro descobriremos o id do container
+usando "docker ps", e então executamos o comando que vai chamar 
+"cat /data.txt" para exibir o conteúdo do arquivo no container do id
+informado, como descrito abaixo:
+
+docker exec <container-id> cat /data.txt
+
+Agora para observar que os dados de um container são independentes dois
+dados de outro container vamos executar o comando que vai subir outro
+container ubuntu, assim:
+
+docker run -it ubuntu ls /
+
+E como o "ls /" já foi passado no parâmetro, imediatamete podemos ver que
+o arquivo data.txt não está lá, nos mostrando que o container é diverso
+daquele que fora executado anteriormente. 
+
+Volumes de container
+
+Com o experimento anterior, nós vimos que cada container inicia através
+de uma definição de imagem cada vez que ele é iniciado. 
+Podemos criar, atualizar e excluir arquivos no container e essas mudanças
+serão perdidas quando o container for removido e todas as mudanças são
+isoladas para aquele container. Mas poderemos mudar isso com os Volumes.
+
+Os Volumes dão a habilidade de conectar um caminho do sistema de arquivos
+específico do container com a maquina hospedeira. Se nós montarmos o 
+mesmo diretório, veremos os mesmos arquivos.
+
+Existem dois tipos principais de volumes e eventualmente usaremos ambos.
+Começaremos com os volumes nomeados.
+
+Persistindo os dados da nossa app
+
+Por padrão, o app todo list armazena seus dados em um banco de dados
+SQLite em /etc/todos/todo.db e se você não estiver familiarizado com o 
+SQLite, não se preocupe. Ele é um banco de dados relacional simples, em
+que os dados são armazenados em apenas um arquivo. Não é a melhor solução
+para aplicações de larga escala, mas é adequado para demonstrações
+pequenas. Posteriormente trocaremos para um SGBD diferente.
+
+Com o banco de dados sendo um único arquivo, se nós quisermos persistir
+esse arquivo no hospedeiro e deixá-lo disponível para o próximo 
+container, devemos ser capazes de retomar de onde o último parou. Como
+nosso container escreve no arquivo todo.db, ele será persistido no volume
+criado no host.
+
+Como mencionado, nós usaremos um volume nomeado. Pense no volume nomeado
+como um simples repositório. O docker mantém a localização física no
+disco e você apenas precisa lembrar do nome do volume. Toda vez que você
+usar o volume, o docker vai se assegurar que a informação correta será
+entregue.
+
+1. Crie o volume usando o comando 'docker volume create'.
+docker volume create todo-db
+
+2. Pare o container no Dashboard (ou com docker rm -f <id>), pois o
+container atual está rodando sem referenciar o volume que recém criado.
+
+3. Inicie o container todo app, mas agora adicionando o parâmetro -v para
+especificar o volume nomeado que será usado e montado em /etc/todos, o Qualquer
+irá capturar todos os arquivos criados no diretório.
+docker run -dp 3000:3000 -v todo-db:/etc/todos getting-started
+
+A partir deste ponto podemos remover o container quantas vezes quisermos e 
+rodá-lo quantas vezes quisermos, e os dados estarão presentes pois não estão 
+mais no espaço de rascunho do container, mais sim no volume nomeado como todo-db.
+Named volumes e Bind mounts (que será visto Posteriormente) são os dois tipos
+principais de volumes suportados por padrão na instalação do docker engine. 
+Existem muitos plugins de driver de volume disponíveis para suportar NFS, SFTP, 
+NetApp, e mais. Isso será especialmente importante quando Começarmos a rodar 
+containers em multiplos hosts em um ambiente clusterizado com swarm, kubernets, etc.
+
+Mergulhando em nosso volume
+
+Muitas pessoas frequentemente perguntam "Onde o docker está armazenando meus dados 
+quando utilizo um volume nomeado?". Se você quiser saber, poderá usar o:
+docker volume inspect <nome_do_volume>
+E como retorno obterá:
+docker volume inspect todo-db
+[
+    {
+        "CreatedAt": "2019-09-26T02:18:36Z",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/todo-db/_data",
+        "Name": "todo-db",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+
+O ponto de montagem é a localização atual no disco onde os dados estão armazenados.
+Note que na maioria das maquinas você deverá possuir privilégio de administrador (root)
+para acessar este diretório.
+
+Acessando os dados diretamente  no docker desktop
+
+Rodando o docker desktop, os comandos docker são na realidade executados em uma pequena
+maquina virtual no host. Se você quiser ver o conteúdo do ponto de montagem, você
+precisaria primeiro entrar na maquina virtual.
